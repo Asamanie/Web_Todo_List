@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Codeup Todo list</title>
+</head>
+
+<?php
+    echo "<h4>GET<br>";
+        var_dump($_GET);
+    echo "<h4>POST<br>";    
+        var_dump($_POST);
+    ?>
+<body>
+	<a id="top_of_page"></a>
+	
+	<h1>TODO List</h1>
+	<p>
+	<ul>
+			<li>Laundry</li>
+			<li>Sweep floors</li>
+			<li>Clean bathrooms</li>
+			<li>Wash car</li>
+			<li>Dust the furniture</li>
+	</ul>
+	<form>
+		<h3>Do you need to add a task to your TODO list?<br>Simply type your task in box below and click ADD task:</h3>
+        <form method="POST">
+              <!-- <label for="add_item">Add item to TODO list:</label> -->
+              <input id="add_task" name="add_task" type="text"placeholder="type task here">
+              <input type="submit" value="ADD task">
+		</form><br>
+
+
+	<a href="#top_of_page">Go to the top of the page</a>
+</body>
+</html>
