@@ -20,6 +20,7 @@ function save_file($filename, $array) {
 }
 
 $new_task = open_file(FILENAME);
+
  
 // if get ID in URL   
 if (isset($_GET['id'])) {
@@ -35,21 +36,21 @@ if (isset($_POST['add_task'])) {
 }
 // Verify there were uploaded files and no errors
 if (count($_FILES) > 0 && $_FILES['file1']['error'] == 0) {
-    // Set the destination directory for uploads
     $upload_dir = '/vagrant/sites/todo.dev/public/uploads/';
-    // Grab the filename from the uploaded file by using basename
     $filename = basename($_FILES['file1']['name']);
-    // Create the saved filename using the file's original name and our upload directory
     $saved_filename = $upload_dir . $filename;
-    // Move the file from the temp location to our uploads directory
     move_uploaded_file($_FILES['file1']['tmp_name'], $saved_filename);
+
+
+}
+//merge the open file w/ the the task
+if (isset($saved_filename)) {
+    $file_todo = $saved_filename;
+    $new_file = open_file($file_todo);  // turns the sile into a array
+    $new_task = array_merge($new_task,$new_file);
 }
 
-// Check if we saved a file
-if (isset($saved_filename)) {
-    // If we did, show a link to the uploaded file
-    echo "<p>You can download your file <a href='/uploads/{$filename}'>here</a>.</p>";
-}
+
 
 ?>
 
