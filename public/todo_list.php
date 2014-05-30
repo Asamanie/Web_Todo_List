@@ -1,3 +1,41 @@
+<?php
+define('FILENAME', 'data/list.txt');
+
+
+//  open a file process
+function open_file($filename) { 
+    $handle = fopen($filename, 'r'); // opens file and makes sure its readable
+    $contents = fread($handle, filesize($filename)); //checks file size
+    fclose($handle); // closes the file
+    return explode("\n", $contents); // breaks up the 'string' into a array
+}
+
+// 
+function save_file($filename, $array) {
+		if (is_writable($filename)) {     // checks to see is file is a writable file
+			$handle = fopen($filename, 'w'); // writes newly added task the the files
+			fwrite($handle, implode("\n", $array));  // takes array w/ new added task then converst to string
+			fclose($handle); // closes the file
+		}
+}
+
+$new_task = open_file(FILENAME);
+ 
+// if get ID in URL   
+if (isset($_GET['id'])) {
+	unset($new_task[$_GET['id']]); //delete item selected
+	save_file(FILENAME,$new_task); //saved changes 
+	$new_task = open_file(FILENAME); //reopen new file w/ changes
+}	
+
+if (isset($_POST['add_task'])) {
+	$item = trim($_POST['add_task']);
+	array_push($new_task, $item);
+	save_file(FILENAME,$new_task);
+}
+
+?>
+
 <!DOCTYPE html>
 <html>
 	<head>
@@ -9,23 +47,24 @@
 		<h1>TODO List</h1>
 		<ul>
 				<?php
-				$task = ['Laundry','Sweep floors','Clean bathrooms','Wash car','Dust the furniture'];
-				foreach ($task as $item){
-					echo "<li>$item</li>";				
+				foreach ($new_task as $key => $item){
+					echo "<li>$item<a href = '?id=$key'> -Remove task-</a></li>";				
 				}
+				
 				?>
 
 		</ul>
 			<h3>Do you need to add a task to your TODO list?<br>Simply type your task in box below and click ADD task:</h3>
-	        <form method="POST" action="/process-form1.php">
+	        <form method="POST" action="todo_list.php">
 	            <p>
-	              <label for="add_item">Add item to TODO list:</label>
+	              <label for="add_task">Add item to TODO list:</label>
 	              <input id="add_task" name="add_task" type="text"placeholder="type task here">
 	            </p> 
 	            <p>
-	              <input type="submit" value="ADD task">
+	              <input type="submit">
 	            </p>  
 			</form>
+
 
 	</body>
 </html>
