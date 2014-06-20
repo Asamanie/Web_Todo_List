@@ -1,6 +1,4 @@
-walk dog
-test
-nk
-walk dog
-test
-nk
+walk the dog
+catch the code
+send msg to user
+cut grass
