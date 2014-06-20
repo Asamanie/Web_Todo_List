@@ -1,6 +1,6 @@
 <?
 require('classes/filestore.php');
-//  open a file process
+
 $file = new Filestore('data/list.txt');
 
 // define('FILENAME', 'data/list.txt');
