@@ -6,6 +6,8 @@ $file = new Filestore('data/list.txt');
 // define('FILENAME', 'data/list.txt');
 $new_task = $file->read(); 
 
+class UnexpectedTypeException extends Exception {}
+
 // get ID in URL   
 if (isset($_GET['id'])) {
 	unset($new_task[$_GET['id']]); //delete item selected
@@ -14,18 +16,28 @@ if (isset($_GET['id'])) {
 	header ('Location: /todo_list.php');
 }	
 // add new items to todo list and will give error if empty or > than 240 chars  
-if (isset($_POST['add_task'])) {
-	$item = trim($_POST['add_task']);
-	// ********try {
-		if (strlen($item) > 240 || strlen($item) == 0) {
-			// *********throw new Exception ("New task can't be empty or exceed 240 characters");
+
+
+try {
+	if (isset($_POST['add_task'])) {
+		$item = trim($_POST['add_task']);
+		if ($_POST['add_task'] == "" || strlen($_POST['add_task'] > 240)) {
+			throw new UnexpectedTypeException("New task can't be empty or exceed 240 characters");
+		
+			
+		
+			// if (strlen($item) > 240 || strlen($item) == 0) {
 		} else {
 			array_push($new_task, $item);  // once checks are complete it will push new task onto array
 			$file->write($new_task);
 			header ('Location: /todo_list.php');	
-		} 
-	}	
-// ********}
+		}
+	}
+		
+} catch (UnexpectedTypeException $e) {
+	$msg = $e->getMessage() . PHP_EOL;
+}
+
 // Verify there were uploaded files and no errors
 if (count($_FILES) > 0 && $_FILES['file1']['error'] == 0) {
     $upload_dir = '/vagrant/sites/todo.dev/public/uploads/';
@@ -54,6 +66,9 @@ if (isset($saved_filename)) {
 	</head>
 	<body>
 		<h1>TODO List</h1>
+		<? if (isset($msg)) : ?>
+			<?="Sorry, your New task can't be empty or exceed 240 characters"?>
+		<? endif; ?>	 
 		<ul>
 			<? foreach ($new_task as $key => $item): ?>
 				<ul><?= htmlspecialchars(strip_tags($item)). "<a href='?id=$key'>  -Remove task-</a>";?></ul>		
