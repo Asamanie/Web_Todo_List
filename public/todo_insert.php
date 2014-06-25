@@ -16,41 +16,44 @@ $dbc->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 // // // Run query, if there are errors they will be thrown as PDOExceptions
 // $dbc->exec($query);
 
+function read_lines($filename) {
+
+    $handle = fopen($filename, "r");
+    if(filesize($filename) > 0) {
+        $contents = trim(fread($handle, filesize($filename))); //     contents = string
+        $contents_array = explode("\n", $contents);
+
+    } else {
+        $contents_array = array();
+    }
+
+    fclose($handle);
+    return $contents_array;
+}
 
 //      c. Is list being uploaded? => Add todos
 // 3. Query DB for total todo count.
 // 4. Determine pagination values.
 // 5. Query for todo on current page
 //
-//	<form id="form delete" method="POST">
-//		<input type="hidden" name="remove id">
-//	</form>	
 
-// Get new instance of PDO object
+function getOffset() {
+    $page = isset($_GET['page']) ? $_GET['page'] : 1;
+    return ($page - 1) * 10;
+}
 
-
-// setting the limit and offset
-$limit = 10;
+$limitRecord = 10;
 $pageNumber = 0;
 $offset = 0;
 
-
-$query = 'SELECT * FROM todo_list LIMIT :limitRecord OFFSET :offset';
-$stmt = $dbc->prepare($query);
-$stmt->bindValue(':limitRecord', $limit, PDO::PARAM_INT);
-$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-$stmt->execute();
-$todos_array = $stmt->fetchAll(PDO::FETCH_ASSOC);
-// var_dump($todos_array);
-
-
+if (isset($_GET['page'])) {
+    $pageNumber=$_GET['page'];
+    $offset = $pageNumber * $limitRecord;
+}
 // 2. Check if something was posted.
 // 		a. Is item being added? => Add todo
 //      b. Is item being removed? => Remove it
 if (!empty($_POST)){	
-
-	// var_dump($_POST);
-
 	if (isset($_POST['add_task'])) {
 		$stmt = $dbc->prepare('INSERT INTO todo_list (task) VALUES (:task)');
  		$stmt->bindValue(':task', $_POST['add_task'], PDO::PARAM_STR);
@@ -67,6 +70,21 @@ if (!empty($_POST)){
  		exit;(0);
 	}
 }	
+
+$query = 'SELECT * FROM todo_list LIMIT :limitRecord OFFSET :offset';
+$stmt = $dbc->prepare($query);
+$stmt->bindValue(':limitRecord', $limitRecord, PDO::PARAM_INT);
+$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+$stmt->execute();
+$todos_array = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$count = $dbc->query('SELECT count(*) FROM todo_list')->fetchColumn();
+
+$count = $dbc->query("SELECT * FROM todo_list;")->rowCount();
+$numPage = floor($count / $limitRecord);
+$nextPage = $pageNumber + 1;
+$prevPage = $pageNumber - 1;
+
 
 		
 // Verify there were uploaded files and no errors
@@ -98,7 +116,7 @@ if (!empty($_POST)){
 		<h1>TODO List</h1>
 		<? if (isset($msg)) : ?>
 			<?="Sorry, your New task can't be empty or exceed 240 characters"?>
-		<? endif; ?>	 
+		<? endif; ?>
 		<ul>
 			<? foreach ($todos_array as $item): ?>
 				<ul><?= $item['id'] ?>
@@ -106,6 +124,15 @@ if (!empty($_POST)){
 					<button class="btn btn-danger btn-sm pull-right btn-remove" data-todo="<?= $item['id']; ?>">Remove</button></ul>	
 			<? endforeach; ?>
 		</ul>
+
+		<?php if ($pageNumber > 0): ?>
+        	<a href="?page=<?= $prevPage; ?>">&larr; Previous</a>
+    	<?php endif; ?>
+    
+    	<?php if ($pageNumber < $numPage): ?>
+    		<a href="?page=<?= $nextPage; ?>">Next &rarr;</a>
+    	<?php endif; ?>	 
+
 			<h3>Do you need to add a task to your TODO list?<br>Simply type your task in box below and click ADD task:</h3>
 	        <form method="POST" action="todo_insert.php">
 	            <p>	
@@ -116,8 +143,8 @@ if (!empty($_POST)){
 	             	<input type="submit">
 	            </p>  
 			</form>	
-		<!-- <h3>Upload File</h3>
-			<form method="POST" enctype="multipart/form-data" action="/todo_list.php">
+		<h3>Upload File</h3>
+			<form method="POST" enctype="multipart/form-data" action="/todo_insert.php">
 			    <p>
 			        <label for="file1">File to upload: </label>
 			        <input type="file" id="file1" name="file1">
@@ -125,7 +152,7 @@ if (!empty($_POST)){
 			    <p>
 			        <input type="submit" value="Upload"> 
 			    </p>
-			</form> -->
+			</form> 
 
 			<form id="remove-form" action="todo_insert.php" method="post">
 			    <input id="remove-id" type="hidden" name="remove" value="">
