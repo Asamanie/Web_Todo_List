@@ -1,0 +1,46 @@
+body {
+    background-image: url(http://todo.dev/img/aluminum_texture.jpg);
+    background-size: 100% auto
+}
+
+h1 {
+    color: #000000;
+    /*text-align: center;*/
+    font-family: "Arial";
+    text-shadow: #808080 0.1em 0.1em 0.2em;
+}
+
+h3 {
+    color: #000000;
+    /*text-align: center;*/
+    font-family: "Arial";
+    text-shadow: #808080 0.1em 0.1em 0.2em
+}
+
+ul {
+	font-size: 33px;
+    color: #000000;
+	/*text-align: center;*/
+	font-family: "Arial";
+}
+
+input, label, p {
+	/*text-align: center;*/
+	font-family: "Arial";
+}
+
+a {
+    font-size: 20px;
+    color: black;
+    opacity: 0.2;
+    text-decoration: none;
+    -webkit-transition: opacity 0.25s;
+}    
+
+a:hover {
+    transition: 0.75s;
+    opacity: 1;
+}
+
+
+
