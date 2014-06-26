@@ -71,6 +71,36 @@ if (!empty($_POST)){
 	}
 }	
 
+// Verify there were uploaded files and no errors
+if (count($_FILES) > 0 && $_FILES['file1']['error'] == 0) {
+    
+    if ($_FILES['file1']["type"] != "text/plain") {
+    	echo "ERROR: must be text file";
+    } else {
+    	$upload_dir = '/vagrant/sites/todo.dev/public/uploads/';
+	    $filename = basename($_FILES['file1']['name']);
+	    $saved_filename = $upload_dir . $filename;
+	    move_uploaded_file($_FILES['file1']['tmp_name'], $saved_filename);
+
+		$todos_uploaded = read_lines($saved_filename);
+		$stmt = $dbc->prepare('INSERT INTO todo_list (task) VALUES (:task)');
+
+        foreach ($todos_uploaded as $value) {
+           $stmt->bindValue(':task', $value, PDO::PARAM_STR);
+           $stmt->execute();
+        }
+           header("Location: /todo_insert.php");
+           exit(0);	    
+    }	
+}
+//merge the open file w/ the the task
+if (isset($saved_filename)) {
+    $file_todo = $saved_filename;
+    $new_file = $file->read($file_todo);  // turns the string into an array
+    $new_task = array_merge($new_task,$new_file);
+    $file->write($new_task);
+}
+
 $query = 'SELECT * FROM todo_list LIMIT :limitRecord OFFSET :offset';
 $stmt = $dbc->prepare($query);
 $stmt->bindValue(':limitRecord', $limitRecord, PDO::PARAM_INT);
@@ -84,23 +114,6 @@ $count = $dbc->query("SELECT * FROM todo_list;")->rowCount();
 $numPage = floor($count / $limitRecord);
 $nextPage = $pageNumber + 1;
 $prevPage = $pageNumber - 1;
-
-
-		
-// Verify there were uploaded files and no errors
-// if (count($_FILES) > 0 && $_FILES['file1']['error'] == 0) {
-//     $upload_dir = '/vagrant/sites/todo.dev/public/uploads/';
-//     $filename = basename($_FILES['file1']['name']);
-//     $saved_filename = $upload_dir . $filename;
-//     move_uploaded_file($_FILES['file1']['tmp_name'], $saved_filename);
-// }
-// //merge the open file w/ the the task
-// if (isset($saved_filename)) {
-//     $file_todo = $saved_filename;
-//     $new_file = $file->read($file_todo);  // turns the string into an array
-//     $new_task = array_merge($new_task,$new_file);
-//     $file->write($new_task);
-// }
 
 ?>
 
@@ -133,18 +146,18 @@ $prevPage = $pageNumber - 1;
     		<a href="?page=<?= $nextPage; ?>">Next &rarr;</a>
     	<?php endif; ?>	 
 
-			<h3>Do you need to add a task to your TODO list?<br>Simply type your task in box below and click ADD task:</h3>
-	        <form method="POST" action="todo_insert.php">
-	            <p>	
-	             	<label for="add_task">Add item to TODO list:</label>
-	             	<input id="add_task" name="add_task" type="text"placeholder="type task here">	            
-	            </p> 
-	            <p>
-	             	<input type="submit">
-	            </p>  
-			</form>	
+		<h3>Do you need to add a task to your TODO list?<br>Simply type your task in box below and click ADD task:</h3>
+        <form method="POST" action="todo_insert.php">
+            <p>	
+             	<label for="add_task">Add item to TODO list:</label>
+             	<input id="add_task" name="add_task" type="text"placeholder="type task here">	            
+            </p> 
+            <p>
+             	<input type="submit">
+            </p>  
+		</form>	
 		<h3>Upload File</h3>
-			<form method="POST" enctype="multipart/form-data" action="/todo_insert.php">
+			<form method="POST" enctype="multipart/form-data" action="/todo_insert.php" role="form">
 			    <p>
 			        <label for="file1">File to upload: </label>
 			        <input type="file" id="file1" name="file1">
